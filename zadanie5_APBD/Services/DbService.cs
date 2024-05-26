@@ -15,28 +15,30 @@ namespace zadanie5_APBD.Services
         }
 
 
-        public async Task<IEnumerable<object>> GetTrips()
+        public async Task<IEnumerable<TripDto>> GetTrips()
         {
-            IEnumerable<object> tripList = await _Mastercontext.Trips.Select(e => new
-            {
-                e.Name,
-                e.Description,
-                e.DateFrom,
-                e.DateTo,
-                e.MaxPeople,
-                Country = e.CountryTrips.Select(d => d.IdCountryNavigation)
-                                        .Select(d => new { Name = d.Name })
-                                        .ToList(),
-                
-                Client = e.ClientTrips.Select(d => d.IdClientNavigation)
-                                      .Select(d => new { d.FirstName, d.LastName })
-                                      .ToList()
-
-            }).OrderByDescending(d => d.DateFrom)
-              .ToListAsync();
-
-            return tripList;
+            return await _Mastercontext.Trips
+                .OrderByDescending(t => t.DateFrom)
+                .Select(t => new TripDto
+                {
+                    Name = t.Name,
+                    Description = t.Description,
+                    DateFrom = t.DateFrom,
+                    DateTo = t.DateTo,
+                    MaxPeople = t.MaxPeople,
+                    Countries = t.CountryTrips.Select(ct => new CountryDto
+                    {
+                        Name = ct.IdCountryNavigation.Name 
+                    }).ToList(),
+                    Clients = t.ClientTrips.Select(ct => new ClientDto
+                    {
+                        FirstName = ct.IdClientNavigation.FirstName,
+                        LastName = ct.IdClientNavigation.LastName
+                    }).ToList()
+                })
+                .ToListAsync();
         }
+
         public async Task<bool> DeleteClient(int idClient)
         {                           
             if (_Mastercontext.ClientTrips.AnyAsync(e => e.IdClient == idClient).Result==true)
