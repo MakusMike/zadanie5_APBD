@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using zadanie5_APBD.Models;
 using zadanie5_APBD.Services;
 
 namespace zadanie5_APBD.Controllers
